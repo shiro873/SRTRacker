@@ -41,7 +41,7 @@ public abstract class LocationsDb extends RoomDatabase {
                                 location.setLocLon(0.0);
                                 location.setAddressName("");
                                 location.setImage("");
-                                location.setUserIp("");
+                                location.setUserId("");
                                 Executors.newSingleThreadExecutor().execute(new Runnable() {
                                     @Override
                                     public void run() {

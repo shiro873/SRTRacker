@@ -16,6 +16,7 @@ import android.view.View;
 
 import com.avalanche.srtracker.GeofencingAlert.GeofenceTransitionsIntentService;
 import com.avalanche.srtracker.R;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.GeofencingRequest;
@@ -37,6 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
+    static final int REQUEST_CHANGE_PASSWORD = 5;
     Bitmap imageBitmap;
     FloatingActionButton camera;
     FloatingActionButton sendToServer;
@@ -45,6 +47,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GeofencingClient geofencingClient;
     private List<Geofence> geofenceList;
     PendingIntent geofencePendingIntent;
+
+    FloatingActionMenu menu;
+    FloatingActionMenu resetPassword, logout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +61,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         viewModel = ViewModelProviders.of(this).get(MapsViewModel.class);
-
+        initGeofence();
         camera = findViewById(R.id.imageButton);
         sendToServer = findViewById(R.id.sendButton);
+        menu = findViewById(R.id.floatingMenu);
+        resetPassword = findViewById(R.id.changePassword);
+        logout = findViewById(R.id.logout);
 
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,8 +82,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+    }
 
-
+    private void initGeofence(){
         geofencingClient = LocationServices.getGeofencingClient(this);
         geofenceList = new ArrayList<>();
         geofenceList.add(new Geofence.Builder().setRequestId("1")

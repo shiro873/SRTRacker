@@ -10,8 +10,26 @@ public class SrLocation {
     private double locLat;
     private double locLon;
     private String image;
-    private String UserIp;
+    private String UserId;
     private String AddressName;
+    private double distance;
+    private int batteryParcentage;
+
+    public int getBatteryParcentage() {
+        return batteryParcentage;
+    }
+
+    public void setBatteryParcentage(int batteryParcentage) {
+        this.batteryParcentage = batteryParcentage;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
 
     public int getId() {
         return id;
@@ -45,12 +63,12 @@ public class SrLocation {
         this.image = image;
     }
 
-    public String getUserIp() {
-        return UserIp;
+    public String getUserId() {
+        return UserId;
     }
 
-    public void setUserIp(String userIp) {
-        UserIp = userIp;
+    public void setUserId(String userIp) {
+        UserId = userIp;
     }
 
     public String getAddressName() {
