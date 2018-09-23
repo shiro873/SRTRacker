@@ -10,7 +10,7 @@ public class LoginLogs {
     private String userId;
     private String loginTime;
     private String logoutTime;
-    private String isLoggedIn;
+    private boolean LoggedIn;
 
     public int getId() {
         return id;
@@ -46,11 +46,11 @@ public class LoginLogs {
 
 
 
-    public String getIsLoggedIn() {
-        return isLoggedIn;
+    public boolean IsLoggedIn() {
+        return LoggedIn;
     }
 
-    public void setIsLoggedIn(String isLoggedIn) {
-        this.isLoggedIn = isLoggedIn;
+    public void setIsLoggedIn(boolean LoggedIn) {
+        this.LoggedIn = LoggedIn;
     }
 }

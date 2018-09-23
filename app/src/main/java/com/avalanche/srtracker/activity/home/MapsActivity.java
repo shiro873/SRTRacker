@@ -2,12 +2,16 @@ package com.avalanche.srtracker.activity.home;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +20,10 @@ import android.view.View;
 
 import com.avalanche.srtracker.GeofencingAlert.GeofenceTransitionsIntentService;
 import com.avalanche.srtracker.R;
+import com.avalanche.srtracker.activity.changepassword.ChangePassActivity;
+import com.avalanche.srtracker.model.LoginLogs;
+import com.avalanche.srtracker.model.SrDestinationLocations;
+import com.avalanche.srtracker.model.User;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -30,7 +38,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -44,9 +56,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     FloatingActionButton sendToServer;
     MapsViewModel viewModel;
 
-    private GeofencingClient geofencingClient;
-    private List<Geofence> geofenceList;
-    PendingIntent geofencePendingIntent;
+    MutableLiveData<List<SrDestinationLocations>> locationsMutableLiveData;
 
     FloatingActionMenu menu;
     FloatingActionMenu resetPassword, logout;
@@ -61,7 +71,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         viewModel = ViewModelProviders.of(this).get(MapsViewModel.class);
-        initGeofence();
+
+        locationsMutableLiveData = viewModel.getLocationsMutableLiveData();
+        locationsMutableLiveData.observe(this, new Observer<List<SrDestinationLocations>>() {
+            @Override
+            public void onChanged(@Nullable List<SrDestinationLocations> srDestinationLocations) {
+                initGeofence(srDestinationLocations);
+            }
+        });
+
+
         camera = findViewById(R.id.imageButton);
         sendToServer = findViewById(R.id.sendButton);
         menu = findViewById(R.id.floatingMenu);
@@ -82,62 +101,46 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        logout.setOnMenuButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
+
+        resetPassword.setOnMenuButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, ChangePassActivity.class);
+                startActivityForResult(intent, REQUEST_CHANGE_PASSWORD);
+            }
+        });
     }
 
-    private void initGeofence(){
-        geofencingClient = LocationServices.getGeofencingClient(this);
-        geofenceList = new ArrayList<>();
-        geofenceList.add(new Geofence.Builder().setRequestId("1")
-                .setCircularRegion(0.0, 0.0, 100)
-                .setExpirationDuration(24 * 60 * 60 * 1000)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-                .build());
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        geofencingClient.addGeofences(geofencingRequest(), getGeofencePendingIntent())
-                .addOnSuccessListener(this, new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-
-                    }
-                })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
+    //initialize geofence
+    public void initGeofence(List<SrDestinationLocations> srDestinationLocations){
+        viewModel.initComponents(this, this);
+        viewModel.insertMrLocations(srDestinationLocations);
+        List<Geofence> geofences = viewModel.getGeofenceList(srDestinationLocations);
+        viewModel.initGefence(geofences);
     }
 
-    private GeofencingRequest geofencingRequest(){
-        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-        builder.addGeofences(geofenceList);
-        return builder.build();
+    //user logout
+    public void logout(){
+        LiveData<LoginLogs> logsLiveData = viewModel.getTodaysLog();
+        logsLiveData.observe(this, new Observer<LoginLogs>() {
+            @Override
+            public void onChanged(@Nullable LoginLogs logs) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd:MM:yyyy_HH:mm:ss");
+                String currentDateandTime = sdf.format(new Date());
+                logs.setLogoutTime(currentDateandTime);
+                viewModel.updateLog(logs);
+                viewModel.removeGeofenceAlert();
+                viewModel.clearCache();
+            }
+        });
     }
-
-    private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-        if (geofencePendingIntent != null) {
-            return geofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        geofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-        return geofencePendingIntent;
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -173,6 +176,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
+        }
+        if(requestCode == REQUEST_CHANGE_PASSWORD && resultCode == RESULT_OK){
+            Bundle extras = data.getExtras();
+            String password = extras.getString("pass", "");
+
+            if(!password.equals("")){
+                final User user = viewModel.getUserFromCache();
+                user.setPassword(password);
+                MutableLiveData<JSONObject> mutableLiveData = viewModel.changePasswordNetwork(user);
+                mutableLiveData.observe(this, new Observer<JSONObject>() {
+                    @Override
+                    public void onChanged(@Nullable JSONObject jsonObject) {
+                        viewModel.changePasswordDb(user);
+                    }
+                });
+            }
         }
     }
 }

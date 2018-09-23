@@ -49,6 +49,12 @@ dependencies {
 
     //gson
     implementation 'com.google.code.gson:gson:2.8.5'
-
+    //floating menu
     implementation 'com.github.clans:fab:1.6.2'
+
+    //fast netwrking library
+    implementation 'com.amitshekhar.android:android-networking:1.0.2'
+
+    //chaching library
+    implementation 'com.github.Guilherme-HRamos:Easy-Save:1.01'
 }

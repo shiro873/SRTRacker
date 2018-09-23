@@ -12,6 +12,10 @@ public class SrDestinationLocations {
 
     private double Longitude;
 
+    private double Latitude;
+
+    private String UserId;
+
     public int getId() {
         return Id;
     }
@@ -51,8 +55,4 @@ public class SrDestinationLocations {
     public void setUserId(String userId) {
         UserId = userId;
     }
-
-    private double Latitude;
-
-    private String UserId;
 }

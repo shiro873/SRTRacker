@@ -16,7 +16,7 @@ public class LocationManager {
         locationWorkerworker = new LocationWorker(context, activity);
     }
 
-    public void EnqueueWork(){
+    public void enqueueWork(){
         locationWorkRequest = new PeriodicWorkRequest.Builder(LocationWorker.class, 1, TimeUnit.HOURS).build();
         WorkManager.getInstance().enqueue(locationWorkRequest);
     }
