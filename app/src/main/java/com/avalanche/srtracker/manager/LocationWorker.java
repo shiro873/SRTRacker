@@ -5,19 +5,20 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.avalanche.srtracker.model.SrLocation;
+import com.avalanche.srtracker.model.Token;
 import com.avalanche.srtracker.model.User;
+import com.avalanche.srtracker.network.ApiClient;
+import com.avalanche.srtracker.network.ApiInterface;
 import com.avalanche.srtracker.repository.MrLocationRepository;
 import com.avalanche.srtracker.repository.UserRepository;
 import com.avalanche.srtracker.util.BatteryUtils;
 import com.avalanche.srtracker.util.LocationUtils;
-import com.avalanche.srtracker.util.NetwrokDataUtils;
-import com.google.gson.Gson;
 
-import java.util.List;
+import java.io.IOException;
 
-import androidx.work.Data;
 import androidx.work.Worker;
 import br.vince.easysave.EasySave;
+import retrofit2.Call;
 
 public class LocationWorker extends Worker {
     private Context context;
@@ -43,8 +44,14 @@ public class LocationWorker extends Worker {
     @Override
     public Result doWork() {
         setSrLocation();
-        boolean hasSent = sendData();
-        if(hasSent){
+        String userId = "";
+        Call<SrLocation> srLocationCall = sendData();
+        try{
+            userId = srLocationCall.execute().body().getUserId();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        if(userId.equals(save.retrieveModel("user", User.class).getUserId())){
             return Result.SUCCESS;
         }else {
             saveDataOffline();
@@ -72,8 +79,14 @@ public class LocationWorker extends Worker {
         locationRepository.insert(location);
     }
 
-    private boolean sendData() {
-        return new NetwrokDataUtils().sendMrLocationData(location);
+    private Call<SrLocation> sendData() {
+        //return new NetwrokDataUtils().sendMrLocationData(location);
+        Token token = save.retrieveModel("token", Token.class);
+        ApiInterface apiClient = ApiClient.getClient().create(ApiInterface.class);
+        Call<SrLocation> srLocationCall = apiClient.postTrackLog(token.getAccess_token()
+                ,token.getToken_type()+" "+token.getAccess_token()
+                ,location);
+        return srLocationCall;
     }
 
     private void cacheLatLong(){

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.method.TextKeyListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,10 +16,16 @@ import android.widget.EditText;
 import com.avalanche.srtracker.R;
 import com.avalanche.srtracker.activity.home.MapsActivity;
 import com.avalanche.srtracker.model.LoginLogs;
+import com.avalanche.srtracker.model.Token;
 import com.avalanche.srtracker.model.User;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,6 +37,7 @@ public class LoginActivity extends AppCompatActivity {
 
     LiveData<User> userLiveData;
     MutableLiveData<User> mutableLiveData;
+    MutableLiveData<Token> tokenMutableLiveData;
 
     String uName;
     String pwd;
@@ -45,7 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.txtPwd);
         button = findViewById(R.id.btnLogin);
 
-
+        password.setVisibility(View.INVISIBLE);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,9 +65,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login(){
         uName = username.getText().toString();
-        pwd = password.getText().toString();
+        //pwd = password.getText().toString();
 
-        userLiveData = model.getUserFromDb(uName);
+        /*userLiveData = model.getUserFromDb(uName);
         User user = userLiveData.getValue();
 
         if(user == null){
@@ -91,6 +99,30 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
             });
+        }*/
+
+        if(!uName.equals("")){
+            final Call<Token> tokenCall = model.getTokenFromNetwork(Integer.parseInt(uName));
+            tokenCall.enqueue(new Callback<Token>() {
+                @Override
+                public void onResponse(Call<Token> call, Response<Token> response) {
+                    Token token = new Token();
+                    token.setAccess_token(response.body().getAccess_token());
+                    token.setExpires_in(response.body().getExpires_in());
+                    token.setToken_type(response.body().getToken_type());
+                    model.cacheToken(token);
+
+                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                    startActivity(intent);
+                }
+
+                @Override
+                public void onFailure(Call<Token> call, Throwable t) {
+
+                }
+            });
+        }else {
+            username.setError("User Id empty");
         }
     }
 
@@ -99,7 +131,7 @@ public class LoginActivity extends AppCompatActivity {
         String currentDateandTime = sdf.format(new Date());
 
         LoginLogs logs = new LoginLogs();
-        logs.setIsLoggedIn(true);
+        logs.setLoggedIn(true);
         logs.setUserId(user.getUserId());
         logs.setLoginTime(currentDateandTime);
         logs.setLogoutTime("");

@@ -59,7 +59,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MutableLiveData<List<SrDestinationLocations>> locationsMutableLiveData;
 
     FloatingActionMenu menu;
-    FloatingActionMenu resetPassword, logout;
+    com.github.clans.fab.FloatingActionButton resetPassword, logout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +72,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         viewModel = ViewModelProviders.of(this).get(MapsViewModel.class);
 
-        locationsMutableLiveData = viewModel.getLocationsMutableLiveData();
+        /*locationsMutableLiveData = viewModel.getLocationsMutableLiveData();
         locationsMutableLiveData.observe(this, new Observer<List<SrDestinationLocations>>() {
             @Override
             public void onChanged(@Nullable List<SrDestinationLocations> srDestinationLocations) {
                 initGeofence(srDestinationLocations);
             }
-        });
+        });*/
 
 
         camera = findViewById(R.id.imageButton);
@@ -101,14 +101,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        logout.setOnMenuButtonClickListener(new View.OnClickListener() {
+        logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 logout();
             }
         });
 
-        resetPassword.setOnMenuButtonClickListener(new View.OnClickListener() {
+        resetPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, ChangePassActivity.class);

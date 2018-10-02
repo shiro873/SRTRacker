@@ -5,20 +5,18 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
-import com.androidnetworking.AndroidNetworking;
-import com.androidnetworking.common.Priority;
-import com.androidnetworking.error.ANError;
-import com.androidnetworking.interfaces.ParsedRequestListener;
-import com.avalanche.srtracker.db.LocationsDb;
 import com.avalanche.srtracker.model.LoginLogs;
+import com.avalanche.srtracker.model.Token;
 import com.avalanche.srtracker.model.User;
+import com.avalanche.srtracker.network.ApiClient;
+import com.avalanche.srtracker.network.ApiInterface;
 import com.avalanche.srtracker.repository.LoginLogsRepository;
 import com.avalanche.srtracker.repository.UserRepository;
-import com.avalanche.srtracker.util.NetwrokDataUtils;
+
 
 import br.vince.easysave.EasySave;
+import retrofit2.Call;
 
 public class LoginViewModel extends AndroidViewModel {
 
@@ -39,7 +37,7 @@ public class LoginViewModel extends AndroidViewModel {
     }
 
     public MutableLiveData<User> getUserFromNetwork(String username){
-        userLiveData = new NetwrokDataUtils().getUser(username);
+        //userLiveData = new NetwrokDataUtils().getUser(username);
         return userLiveData;
     }
 
@@ -53,5 +51,19 @@ public class LoginViewModel extends AndroidViewModel {
 
     public void cacheData(User user){
         save.saveModel("user", user);
+    }
+
+    public void cacheToken(Token token){
+        save.saveModel("token", token);
+    }
+
+    public Call<Token> getTokenFromNetwork(int userId){
+        ApiInterface apiInterface = ApiClient.getClient().create(ApiInterface.class);
+        Call<Token> tokenCall = apiInterface.getToken(userId, "", "password");
+        return tokenCall;
+    }
+
+    public void insertTokenToDb(Token token){
+
     }
 }

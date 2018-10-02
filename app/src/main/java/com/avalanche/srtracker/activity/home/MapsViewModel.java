@@ -16,7 +16,6 @@ import com.avalanche.srtracker.repository.LoginLogsRepository;
 import com.avalanche.srtracker.repository.MrDestLocRepository;
 import com.avalanche.srtracker.repository.UserRepository;
 import com.avalanche.srtracker.util.GeofenceUtils;
-import com.avalanche.srtracker.util.NetwrokDataUtils;
 import com.google.android.gms.location.Geofence;
 
 import org.json.JSONObject;
@@ -53,7 +52,7 @@ public class MapsViewModel extends AndroidViewModel{
         geofenceUtils = new GeofenceUtils(context.getApplicationContext(), activity);
         manager = new LocationManager(context.getApplicationContext(), activity);
         manager.enqueueWork();
-        locationsMutableLiveData = new NetwrokDataUtils().getDestinationLocationsMutableLiveData();
+        //locationsMutableLiveData = new NetwrokDataUtils().getDestinationLocationsMutableLiveData();
     }
 
     public void insertMrLocations(List<SrDestinationLocations> locations){
@@ -111,7 +110,8 @@ public class MapsViewModel extends AndroidViewModel{
     }
 
     public MutableLiveData<JSONObject> changePasswordNetwork(User user){
-        return new NetwrokDataUtils().changeUserPassword(user);
+        //return new NetwrokDataUtils().changeUserPassword(user);
+        return null;
     }
 
     public void changePasswordDb(User user){

@@ -52,9 +52,13 @@ dependencies {
     //floating menu
     implementation 'com.github.clans:fab:1.6.2'
 
-    //fast netwrking library
-    implementation 'com.amitshekhar.android:android-networking:1.0.2'
-
     //chaching library
     implementation 'com.github.Guilherme-HRamos:Easy-Save:1.01'
+
+    //okhttp3
+    implementation 'com.squareup.okhttp3:okhttp:3.11.0'
+
+    //retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
 }
