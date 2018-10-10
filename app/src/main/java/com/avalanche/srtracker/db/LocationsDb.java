@@ -37,9 +37,9 @@ public abstract class LocationsDb extends RoomDatabase {
                             public void onOpen(@NonNull SupportSQLiteDatabase db) {
                                 super.onOpen(db);
                                 final SrLocation location = new SrLocation();
-                                location.setLocLat(0.0);
-                                location.setLocLon(0.0);
-                                location.setAddressName("");
+                                location.setLongitude(0.0);
+                                location.setLatitude(0.0);
+                                location.setLocationName("");
                                 location.setImage("");
                                 location.setUserId("");
                                 Executors.newSingleThreadExecutor().execute(new Runnable() {
@@ -50,6 +50,7 @@ public abstract class LocationsDb extends RoomDatabase {
                                 });
                             }
                         })
+                        .allowMainThreadQueries()
                         .build();
             }
         }

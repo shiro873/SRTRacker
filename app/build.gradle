@@ -16,10 +16,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
@@ -36,10 +40,10 @@ dependencies {
     implementation "android.arch.lifecycle:extensions:$rootProject.archLifecycleVersion"
     annotationProcessor "android.arch.lifecycle:compiler:$rootProject.archLifecycleVersion"
     implementation 'com.android.support:design:27.1.1'
-
     implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation "android.arch.work:work-runtime:$workMannagerVersion"
 
-    implementation "android.arch.work:work-runtime:$workMannagerVersion" // use -ktx for Kotlin
+    // use -ktx for Kotlin
 
     // optional - Firebase JobDispatcher support
     implementation "android.arch.work:work-firebase:$workMannagerVersion"
@@ -49,6 +53,7 @@ dependencies {
 
     //gson
     implementation 'com.google.code.gson:gson:2.8.5'
+
     //floating menu
     implementation 'com.github.clans:fab:1.6.2'
 
@@ -61,4 +66,13 @@ dependencies {
     //retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.github.shiro873:EasyLocationLibrary:0.1.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+
+    // Because RxAndroid releases are few and far between, it is recommended you also
+
+    // explicitly depend on RxJava's latest version for bug fixes and new features.
+
+    // (see https://github.com/ReactiveX/RxJava/releases for latest 2.x.x version)
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
 }

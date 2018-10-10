@@ -17,29 +17,17 @@
         android:layout_alignParentTop="true"
         tools:context=".activity.home.MapsActivity" />
 
-    <com.github.clans.fab.FloatingActionMenu
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="30dp"
-        android:layout_marginStart="20dp"
-        app:menu_icon="@drawable/menu_black"
-        android:id="@+id/floatingMenu">
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/changePassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/password_black" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/logout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logout_black" />
-
-    </com.github.clans.fab.FloatingActionMenu>
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="18dp"
+        android:clickable="true"
+        android:rotation="0"
+        android:src="@drawable/logout_black" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/sendButton"
@@ -58,8 +46,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="445dp"
         android:clickable="true"
         android:rotation="0"
         android:src="@drawable/ic_camera_alt_black_24dp" />

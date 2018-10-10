@@ -13,6 +13,7 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface ApiInterface {
     @FormUrlEncoded
@@ -20,8 +21,15 @@ public interface ApiInterface {
     Call<Token> getToken(@Field("username") int userId, @Field("password") String password, @Field("grant_type") String grant_type);
 
     @POST("/api/LocationTracks")
-    Call<SrLocation> postTrackLog(@Header("Header") String token, @Header("Authorization") String authHeader, @Body SrLocation location);
+    Call<SrLocation> postTrackLog(@Header("Authorization") String authHeader, @Header("HEADER") String token, @Body SrLocation location);
 
-    @GET("api/DealerTravelLocations")
-    Call<List<SrDestinationLocations>> getLocations();
+    @GET("api/DealerTravelLocation/{employeeId}/{date}")
+    Call<List<SrDestinationLocations>> getLocations(@Path("employeeId") String employeeId, @Path("date") String date);
+
+    @GET("api/LocationTrack/UpdateVisitStatus/{id}")
+    Call updateLocationReached(@Path("id") String id);
+
+    @POST("/api/LocationTracks")
+    Call<SrLocation> postTrackLog(@Body SrLocation location);
+
 }

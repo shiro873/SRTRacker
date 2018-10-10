@@ -12,15 +12,15 @@ import java.util.List;
 
 @Dao
 public interface SrLocationDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(SrLocation location);
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insert(SrLocation location);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(SrLocation... locations);
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insertAll(SrLocation... locations);
 
-    @Query("DELETE FROM SrLocation")
-    void deleteAll();
+  @Query("DELETE FROM SrLocation")
+  void deleteAll();
 
-    @Query("SELECT * from SrLocation")
-    LiveData<List<SrLocation>> getAllLocations();
+  @Query("SELECT * from SrLocation")
+  LiveData<List<SrLocation>> getAllLocations();
 }

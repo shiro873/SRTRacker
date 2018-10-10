@@ -13,6 +13,7 @@ import com.avalanche.srtracker.network.ApiClient;
 import com.avalanche.srtracker.network.ApiInterface;
 import com.avalanche.srtracker.repository.LoginLogsRepository;
 import com.avalanche.srtracker.repository.UserRepository;
+import com.avalanche.srtracker.util.PermissionUtils;
 
 
 import br.vince.easysave.EasySave;
@@ -55,6 +56,10 @@ public class LoginViewModel extends AndroidViewModel {
 
     public void cacheToken(Token token){
         save.saveModel("token", token);
+    }
+
+    public void cacheId(String id){
+        save.saveModel("id", id);
     }
 
     public Call<Token> getTokenFromNetwork(int userId){

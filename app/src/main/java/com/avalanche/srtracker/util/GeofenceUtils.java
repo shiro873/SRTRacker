@@ -67,7 +67,9 @@ public class GeofenceUtils {
     private GeofencingRequest geofencingRequest(){
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-        builder.addGeofences(geofenceList);
+        if(geofenceList != null){
+            builder.addGeofences(geofenceList);
+        }
         return builder.build();
     }
 

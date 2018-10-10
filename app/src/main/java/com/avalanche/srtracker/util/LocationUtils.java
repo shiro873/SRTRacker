@@ -15,6 +15,9 @@ import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -35,7 +38,6 @@ public class LocationUtils {
         this.context = context;
         this.activity = activity;
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
-        //fusedLocationProviderClient.setP
     }
 
     public static LocationUtils getINSTANCE(Context context, Activity activity) {
@@ -47,13 +49,6 @@ public class LocationUtils {
 
     public void getLocation() {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
         fusedLocationProviderClient.getLastLocation()
@@ -66,6 +61,13 @@ public class LocationUtils {
                         }
                     }
                 });
+    }
+
+    public void getLocationUpdate(){
+        LocationRequest request = new LocationRequest();
+        request.setPriority(2);
+        request.setInterval(5000);
+
     }
 
     public double getLatitude() {

@@ -5,6 +5,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,12 +13,14 @@ import android.text.method.TextKeyListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 import com.avalanche.srtracker.R;
 import com.avalanche.srtracker.activity.home.MapsActivity;
 import com.avalanche.srtracker.model.LoginLogs;
 import com.avalanche.srtracker.model.Token;
 import com.avalanche.srtracker.model.User;
+import com.avalanche.srtracker.util.PermissionUtils;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -30,10 +33,11 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     LoginViewModel model;
+    PermissionUtils permissionUtils;
 
     EditText username;
-    EditText password;
     Button button;
+    ProgressBar bar;
 
     LiveData<User> userLiveData;
     MutableLiveData<User> mutableLiveData;
@@ -47,13 +51,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        permissionUtils = new PermissionUtils(this, this);
+        permissionUtils.checkPermissions();
+
         model = ViewModelProviders.of(this).get(LoginViewModel.class);
 
         username = findViewById(R.id.txtUserName);
-        password = findViewById(R.id.txtPwd);
         button = findViewById(R.id.btnLogin);
-
-        password.setVisibility(View.INVISIBLE);
+        bar = findViewById(R.id.progressbar);
+        bar.setVisibility(View.INVISIBLE);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,42 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login(){
         uName = username.getText().toString();
-        //pwd = password.getText().toString();
-
-        /*userLiveData = model.getUserFromDb(uName);
-        User user = userLiveData.getValue();
-
-        if(user == null){
-            mutableLiveData = model.getUserFromNetwork(uName);
-            mutableLiveData.observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(@Nullable User user) {
-                    if(pwd.equals(user.getPassword())){
-                        model.insertUser(user);
-                        model.cacheData(user);
-                        model.insertLogs(getLogs(user));
-
-                        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            });
-        }
-        else {
-            userLiveData.observe(this, new Observer<User>() {
-                @Override
-                public void onChanged(@Nullable User user) {
-                    if(pwd.equals(user.getPassword())){
-                        model.cacheData(user);
-                        model.insertLogs(getLogs(user));
-
-                        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            });
-        }*/
-
+        bar.setVisibility(View.VISIBLE);
         if(!uName.equals("")){
             final Call<Token> tokenCall = model.getTokenFromNetwork(Integer.parseInt(uName));
             tokenCall.enqueue(new Callback<Token>() {
@@ -111,6 +82,8 @@ public class LoginActivity extends AppCompatActivity {
                     token.setExpires_in(response.body().getExpires_in());
                     token.setToken_type(response.body().getToken_type());
                     model.cacheToken(token);
+                    model.cacheId(uName);
+                    bar.setVisibility(View.INVISIBLE);
 
                     Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
                     startActivity(intent);
@@ -118,7 +91,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<Token> call, Throwable t) {
-
+                    bar.setVisibility(View.INVISIBLE);
+                    username.setError("Could not connect to server");
                 }
             });
         }else {
@@ -137,5 +111,10 @@ public class LoginActivity extends AppCompatActivity {
         logs.setLogoutTime("");
 
         return logs;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        permissionUtils.permissionResult(requestCode, permissions, grantResults);
     }
 }

@@ -5,31 +5,18 @@ import android.arch.persistence.room.PrimaryKey;
 
 @Entity
 public class SrLocation {
+
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private double locLat;
-    private double locLon;
-    private String image;
+    private double Longitude;
+    private double Latitude;
+    private String Image;
+    private String UserIp;
+    private String LocationName;
+    private String DateTime;
+    private double Kilometer;
     private String UserId;
-    private String AddressName;
-    private double distance;
-    private int batteryParcentage;
-
-    public int getBatteryParcentage() {
-        return batteryParcentage;
-    }
-
-    public void setBatteryParcentage(int batteryParcentage) {
-        this.batteryParcentage = batteryParcentage;
-    }
-
-    public double getDistance() {
-        return distance;
-    }
-
-    public void setDistance(double distance) {
-        this.distance = distance;
-    }
+    private int BatteryPerc;
 
     public int getId() {
         return id;
@@ -39,43 +26,75 @@ public class SrLocation {
         this.id = id;
     }
 
-    public double getLocLat() {
-        return locLat;
+    public double getLongitude() {
+        return Longitude;
     }
 
-    public void setLocLat(double locLat) {
-        this.locLat = locLat;
+    public void setLongitude(double longitude) {
+        Longitude = longitude;
     }
 
-    public double getLocLon() {
-        return locLon;
+    public double getLatitude() {
+        return Latitude;
     }
 
-    public void setLocLon(double locLon) {
-        this.locLon = locLon;
+    public void setLatitude(double latitude) {
+        Latitude = latitude;
     }
 
     public String getImage() {
-        return image;
+        return Image;
     }
 
     public void setImage(String image) {
-        this.image = image;
+        Image = image;
+    }
+
+    public String getUserIp() {
+        return UserIp;
+    }
+
+    public void setUserIp(String userIp) {
+        UserIp = userIp;
+    }
+
+    public String getLocationName() {
+        return LocationName;
+    }
+
+    public void setLocationName(String locationName) {
+        LocationName = locationName;
+    }
+
+    public String getDateTime() {
+        return DateTime;
+    }
+
+    public void setDateTime(String dateTime) {
+        DateTime = dateTime;
+    }
+
+    public double getKilometer() {
+        return Kilometer;
+    }
+
+    public void setKilometer(double kilometer) {
+        Kilometer = kilometer;
     }
 
     public String getUserId() {
         return UserId;
     }
 
-    public void setUserId(String userIp) {
-        UserId = userIp;
+    public void setUserId(String userId) {
+        UserId = userId;
     }
 
-    public String getAddressName() {
-        return AddressName;
+    public int getBatteryPerc() {
+        return BatteryPerc;
     }
 
-    public void setAddressName(String addressName) {
-        AddressName = addressName;
+    public void setBatteryPerc(int batteryPerc) {
+        BatteryPerc = batteryPerc;
     }
 }

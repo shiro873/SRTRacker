@@ -14,21 +14,21 @@ import java.util.List;
 
 @Dao
 public interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(User user);
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insert(User user);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(User... users);
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  void insertAll(User... users);
 
-    @Query("DELETE FROM User")
-    void deleteAll();
+  @Query("DELETE FROM User")
+  void deleteAll();
 
-    @Query("SELECT * from User where username = :username")
-    LiveData<User> getUser(String username);
+  @Query("SELECT * from User where username = :username")
+  LiveData<User> getUser(String username);
 
-    @Query("SELECT * FROM User where userId = :userId")
-    LiveData<User> getUserById(String userId);
+  @Query("SELECT * FROM User where userId = :userId")
+  LiveData<User> getUserById(String userId);
 
-    @Update
-    void updateUser(User user);
+  @Update
+  void updateUser(User user);
 }

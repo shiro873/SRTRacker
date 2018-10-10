@@ -3,6 +3,7 @@ package com.avalanche.srtracker.repository;
 import android.app.Application;
 import android.app.ListActivity;
 import android.arch.lifecycle.LiveData;
+import android.content.Context;
 
 import com.avalanche.srtracker.db.LocationsDb;
 import com.avalanche.srtracker.model.SrLocation;
@@ -14,6 +15,10 @@ public class MrLocationRepository {
 
     public MrLocationRepository(Application application){
         db = LocationsDb.getDatabase(application.getApplicationContext());
+    }
+
+    public MrLocationRepository(Context context){
+        db = LocationsDb.getDatabase(context);
     }
 
     public void insert(SrLocation location){
