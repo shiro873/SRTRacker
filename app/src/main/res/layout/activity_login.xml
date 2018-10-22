@@ -44,6 +44,7 @@
             android:layout_width="365dp"
             android:layout_height="match_parent"
             android:ems="10"
+            android:inputType="number"
             android:hint="Username" />
 
     </android.support.design.widget.TextInputLayout>

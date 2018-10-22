@@ -28,4 +28,8 @@ public class MrDestLocRepository {
     public void delete(){
         db.destinationLocationDao().deleteAll();
     }
+
+    public List<SrDestinationLocations> getAllLocations(){
+        return db.destinationLocationDao().getAllLocation();
+    }
 }

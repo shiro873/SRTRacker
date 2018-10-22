@@ -1,6 +1,9 @@
 package com.avalanche.srtracker.util;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.avalanche.srtracker.model.LocationModel;
@@ -13,8 +16,12 @@ import com.avalanche.srtracker.repository.MrLocationRepository;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import androidx.work.Worker;
 import br.vince.easysave.EasySave;
@@ -36,6 +43,7 @@ public class DataSyncUtil {
     private MrLocationRepository locationRepository;
     private EasySave save;
     private LatLng latLng;
+    private static final int TIME_DIFFERENCE = 2 * 60 * 1000;
 
     public DataSyncUtil(Context context, LatLng latLng){
         this.context = context;
@@ -49,28 +57,36 @@ public class DataSyncUtil {
     }
 
     private void syncData(Context context){
-        setSrLocation();
-        Call<SrLocation> srLocationCall = sendData();
-        srLocationCall.enqueue(new Callback<SrLocation>() {
-            @Override
-            public void onResponse(Call<SrLocation> call, Response<SrLocation> response) {
-                if(response.code() == 500){
-                    saveDataOffline();
-                }
-            }
+        LatLng oldmodel = save.retrieveModel("latlon", LatLng.class);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String currentDateandTime = sdf.format(new Date());
+        String oldDateTime = getCachedTime();
+        long timeDiff = getTimeDiff(oldDateTime, currentDateandTime);
+        if(oldmodel == null){
+            executeDataSend();
+        }else {
+            if(oldmodel.latitude == latLng.latitude && oldmodel.longitude == latLng.longitude && timeDiff < TIME_DIFFERENCE){
 
-            @Override
-            public void onFailure(Call<SrLocation> call, Throwable t) {
-                saveDataOffline();
+            }else {
+                executeDataSend();
             }
-        });
+        }
+
+
+    }
+
+    private Call<SrLocation> sendData() {
+        Token token = save.retrieveModel("token", Token.class);
+        ApiInterface apiClient = ApiClient.getTokenClient(context).create(ApiInterface.class);
+        Call<SrLocation> srLocationCall = apiClient.postTrackLog(location);
+        return srLocationCall;
     }
 
     private void setSrLocation(){
-        LocationUtil oldData = getCachedLat();
-        LatLng oldModel = new LatLng(0, 0);
+        LatLng oldModel = getCachedLat();
+        //LatLng oldModel = new LatLng(0, 0);
         try{
-            oldModel = oldData.getLocation();
+            //oldModel = oldData.get();
         }catch (Exception e){
 
         }
@@ -94,24 +110,110 @@ public class DataSyncUtil {
             location.setUserIp(locationUtils.getDeviceIMEI());
         }
         Log.d("LocSet", "Location set");
+        cacheLatLong();
     }
 
     private void saveDataOffline() {
         locationRepository.insert(location);
     }
 
-    private Call<SrLocation> sendData() {
+    private void executeDataSend(){
+        setSrLocation();
+        Call<SrLocation> srLocationCall = sendData();
+        srLocationCall.enqueue(new Callback<SrLocation>() {
+            @Override
+            public void onResponse(Call<SrLocation> call, Response<SrLocation> response) {
+                if(response.code() == 500){
+                    saveDataOffline();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    String currentDateandTime = sdf.format(new Date());
+                    cacheTime(currentDateandTime);
+                }if(response.code() == 201){
+                    locationRepository.delete();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                    String currentDateandTime = sdf.format(new Date());
+                    cacheTime(currentDateandTime);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SrLocation> call, Throwable t) {
+                saveDataOffline();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                String currentDateandTime = sdf.format(new Date());
+                cacheTime(currentDateandTime);
+            }
+        });
+        List<SrLocation> locations = locationRepository.getAllSaved();
+        if(locations != null){
+            for (SrLocation loc: locations) {
+                Call<SrLocation> call = sendDataCached(loc);
+                call.enqueue(new Callback<SrLocation>() {
+                    @Override
+                    public void onResponse(Call<SrLocation> call, Response<SrLocation> response) {
+                        if(response.code() == 500){
+                            saveDataOffline();
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                            String currentDateandTime = sdf.format(new Date());
+                            cacheTime(currentDateandTime);
+                        }
+                        if(response.code() == 201){
+                            locationRepository.delete();
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                            String currentDateandTime = sdf.format(new Date());
+                            cacheTime(currentDateandTime);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<SrLocation> call, Throwable t) {
+                        saveDataOffline();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+                        String currentDateandTime = sdf.format(new Date());
+                        cacheTime(currentDateandTime);
+                    }
+                });
+            }
+        }
+    }
+
+    private Call<SrLocation> sendDataCached(SrLocation loc){
         Token token = save.retrieveModel("token", Token.class);
         ApiInterface apiClient = ApiClient.getTokenClient(context).create(ApiInterface.class);
-        Call<SrLocation> srLocationCall = apiClient.postTrackLog(location);
+        Call<SrLocation> srLocationCall = apiClient.postTrackLog(loc);
         return srLocationCall;
     }
 
-    private void cacheLatLong(){
-        save.saveModel("latlon", locationUtils);
+    public long getTimeDiff(String oldTime, String newTime){
+        if(oldTime == null){
+            return 0;
+        }
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date dateOne = new Date();
+        Date dateTwo = new Date();
+        try{
+            dateOne = df.parse(oldTime);
+            dateTwo = df.parse(newTime);
+        }catch (ParseException e){
+
+        }
+
+        return Math.abs(dateOne.getTime() - dateTwo.getTime());
     }
 
-    private LocationUtil getCachedLat(){
-        return save.retrieveModel("latlon", LocationUtil.class);
+    private void cacheLatLong(){
+        save.saveModel("latlon", latLng);
+    }
+
+    private LatLng getCachedLat(){
+        return save.retrieveModel("latlon", LatLng.class);
+    }
+
+    private void  cacheTime(String time){
+        save.saveModel("time", time);
+    }
+
+    private String getCachedTime(){
+        return save.retrieveModel("time", String.class);
     }
 }

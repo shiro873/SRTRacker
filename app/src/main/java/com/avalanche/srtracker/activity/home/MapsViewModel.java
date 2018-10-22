@@ -26,6 +26,7 @@ import com.avalanche.srtracker.util.LocationUtil;
 import com.avalanche.srtracker.util.LocationUtils;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import org.json.JSONObject;
 
@@ -88,7 +89,7 @@ public class MapsViewModel extends AndroidViewModel{
                         .setCircularRegion(
                                 loc.getLatitude(),
                                 loc.getLongitude(),
-                                100
+                                500
                         )
 
                         // Set the expiration duration of the geofence. This geofence gets automatically
@@ -97,7 +98,7 @@ public class MapsViewModel extends AndroidViewModel{
 
                         // Set the transition types of interest. Alerts are only generated for these
                         // transition. We track entry and exit transitions in this sample.
-                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                        .setTransitionTypes( Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT )
 
                         // Create the geofence.
                         .build());
@@ -136,7 +137,15 @@ public class MapsViewModel extends AndroidViewModel{
     }
 
     public SrLocation setImageLocation(Bitmap image, LatLng latLng){
-        String stringImage = ConvertToBase64(image);
+        String stringImage = "";
+        if(image == null){
+            stringImage = "";
+        }else {
+            stringImage = ConvertToBase64(image);
+        }
+        //String stringImage = ConvertToBase64(image);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String currentDateandTime = sdf.format(new Date());
         LocationUtil util = new LocationUtil(getApplication().getApplicationContext());
         SrLocation location = new SrLocation();
         location.setImage(stringImage);
@@ -146,11 +155,14 @@ public class MapsViewModel extends AndroidViewModel{
         location.setUserIp(util.getDeviceIMEI());
         location.setUserId(getId());
         location.setKilometer(0);
+        location.setDateTime(currentDateandTime);
         location.setBatteryPerc(batteryUtils.getBatteryPercentage(getApplication().getApplicationContext()));
         return location;
     }
 
     public Call updateLocationReached(SrLocation location){
+        Gson gson = new Gson();
+        String json = gson.toJson(location);
         ApiInterface apiCient = ApiClient.getTokenClient(getApplication()).create(ApiInterface.class);
         return apiCient.postTrackLog(location);
     }

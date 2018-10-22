@@ -32,4 +32,8 @@ public class MrLocationRepository {
     public LiveData<List<SrLocation>> getAll(){
         return db.locationDao().getAllLocations();
     }
+
+    public List<SrLocation> getAllSaved(){
+        return db.locationDao().getAllLocation();
+    }
 }

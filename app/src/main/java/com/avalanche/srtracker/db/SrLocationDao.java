@@ -23,4 +23,7 @@ public interface SrLocationDao {
 
   @Query("SELECT * from SrLocation")
   LiveData<List<SrLocation>> getAllLocations();
+
+  @Query("SELECT * from SrLocation")
+  List<SrLocation> getAllLocation();
 }

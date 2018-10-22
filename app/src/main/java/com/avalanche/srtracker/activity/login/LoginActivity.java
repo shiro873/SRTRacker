@@ -72,32 +72,39 @@ public class LoginActivity extends AppCompatActivity {
     private void login(){
         uName = username.getText().toString();
         bar.setVisibility(View.VISIBLE);
-        if(!uName.equals("")){
+        /*if(!uName.equals("")){
             final Call<Token> tokenCall = model.getTokenFromNetwork(Integer.parseInt(uName));
             tokenCall.enqueue(new Callback<Token>() {
                 @Override
                 public void onResponse(Call<Token> call, Response<Token> response) {
-                    Token token = new Token();
-                    token.setAccess_token(response.body().getAccess_token());
-                    token.setExpires_in(response.body().getExpires_in());
-                    token.setToken_type(response.body().getToken_type());
-                    model.cacheToken(token);
-                    model.cacheId(uName);
-                    bar.setVisibility(View.INVISIBLE);
+                    if(response.code() != 500){
+                        Token token = new Token();
+                        token.setAccess_token(response.body().getAccess_token());
+                        token.setExpires_in(response.body().getExpires_in());
+                        token.setToken_type(response.body().getToken_type());
+                        model.cacheToken(token);
+                        model.cacheId(uName);
+                        bar.setVisibility(View.INVISIBLE);
 
-                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
-                    startActivity(intent);
+                        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                        startActivity(intent);
+                    }else{
+                        bar.setVisibility(View.INVISIBLE);
+                        username.setError("Unauthorized access");
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<Token> call, Throwable t) {
                     bar.setVisibility(View.INVISIBLE);
-                    username.setError("Could not connect to server");
+                    username.setError("Could not connect to internet");
                 }
             });
         }else {
             username.setError("User Id empty");
-        }
+        }*/
+        Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+        startActivity(intent);
     }
 
     private LoginLogs getLogs(User user){
